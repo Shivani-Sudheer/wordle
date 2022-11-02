@@ -1,0 +1,8 @@
+.menu-icon {
+  flex-grow: 0.49;
+}
+
+.title {
+  flex-grow: 0.51;
+  font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+}

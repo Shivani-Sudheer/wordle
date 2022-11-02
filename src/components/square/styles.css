@@ -1,0 +1,21 @@
+.square {
+    height: 58px;
+    width: 40px;
+    margin: 2.5px;
+    border-color: #d3d6da;
+    border-style: solid;
+    border-width: 2px;
+    caret-color: transparent;
+    cursor: default;
+  }
+
+  input:focus{
+    outline: none;
+    cursor: default;
+  }
+
+  input{
+    font-size: 30px;
+    font-weight: bold;
+    padding-left: 19px;
+  }
