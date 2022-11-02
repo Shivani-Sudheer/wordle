@@ -35,6 +35,16 @@ const Square: FC<SquareProps> = ({ isValid, column, thisRow }) => {
 
   let color=newLetters[thisRow][column-1];
   let borderStyle="*";
+  useEffect(()=>{
+    if (isValid === "yes") {
+      if (column === currentColumn) {
+        if(isDelete===true){
+          setSquareValue("")
+          setDelete(false);
+          }
+      }
+    }
+  },[isDelete])
   useEffect(() => {
     if (isValid === "yes") {
       if (column === currentColumn) {
@@ -42,9 +52,6 @@ const Square: FC<SquareProps> = ({ isValid, column, thisRow }) => {
           setCurrentWord(currentWord + currentLetter);
           setSquareValue(currentLetter);
         }
-        if(isDelete===true){
-          setSquareValue("")
-          }
       }
     }
     if (currentColumn === 5) {
@@ -74,7 +81,6 @@ const Square: FC<SquareProps> = ({ isValid, column, thisRow }) => {
       }
     }      
   }, [currentLetter]);
-
   useEffect(()=>{
     if(isDisable===true){
       setDisableEnter(false);

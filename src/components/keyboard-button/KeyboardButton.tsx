@@ -49,6 +49,42 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
   ];
 
   useEffect(() => {
+    console.log("current column", currentColumn);
+    console.log("current word", currentWord);
+    console.log("isDelete", isDelete);
+    console.log("isEnter", isEnter);
+  }, [currentWord]);
+  useEffect(() => {
+    console.log("current column", currentColumn);
+    console.log("isDelete", isDelete);
+    console.log("isEnter", isEnter);
+  }, [currentColumn]);
+  useEffect(() => {
+    console.log("current row", currentRow);
+    console.log("isDelete", isDelete);
+    console.log("isEnter", isEnter);
+  }, [currentRow]);
+  useEffect(() => {
+    console.log("current letter", currentLetter);
+  }, [currentLetter]);
+  useEffect(() => {
+    console.log("letters disabled", isDisable);
+    console.log("isDelete", isDelete);
+    console.log("isEnter", isEnter);
+  }, [isDisable]);
+  useEffect(() => {
+    console.log("enter/delete", isEorD);
+    console.log("isDelete", isDelete);
+    console.log("isEnter", isEnter);
+  }, [isEorD]);
+  useEffect(() => {
+    console.log("isEnter", isEnter);
+  }, [isEnter]);
+  useEffect(() => {
+    console.log("isDelete", isDelete);
+  }, [isDelete]);
+
+  useEffect(() => {
     if (isDisable === false) {
       if (isEnter === true) {
         if (currentRow > 1) {
@@ -119,9 +155,31 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
     } else if (text === "DELETE") {
       setIsDisable(false);
       setCurrentLetter("");
-      setCurrentColumn(currentColumn-1)
-      let arr=currentWord.slice(0,currentColumn-2);
-      setCurrentWord(arr)
+      if (currentColumn !== 5) {
+        if (currentColumn === 1) {
+          if (currentWord.length === 0) {
+            
+          } else {
+            setCurrentColumn(currentColumn - 1);
+            let arr = currentWord.slice(0, currentColumn - 2);
+            setCurrentWord(arr);
+          }
+        }else{
+        setCurrentColumn(currentColumn - 1);
+        let arr = currentWord.slice(0, currentColumn - 2);
+        setCurrentWord(arr);
+        }
+      } else {
+        if (currentWord.length === 4) {
+          setCurrentColumn(4);
+          let arr = currentWord.slice(0, currentColumn - 2);
+          setCurrentWord(arr);
+        } else if (currentWord.length === 5) {
+          setCurrentColumn(5);
+          let arr = currentWord.slice(0, currentColumn - 1);
+          setCurrentWord(arr);
+        }
+      }
       setEorD(true);
       setDelete(true);
     } else {

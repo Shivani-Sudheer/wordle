@@ -20,7 +20,6 @@ const GamePage: FC = () => {
   };
   return (
     <>
-      {/* <div>HI{word.word}</div> */}
       <NavBar />
       <div className="game-space">
         <div className="input-space">
