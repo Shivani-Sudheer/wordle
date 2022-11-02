@@ -49,38 +49,6 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
   ];
 
   useEffect(() => {
-    console.log("current column", currentColumn);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [currentColumn]);
-  useEffect(() => {
-    console.log("current row", currentRow);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [currentRow]);
-  useEffect(() => {
-    console.log("current letter", currentLetter);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [currentLetter]);
-  useEffect(() => {
-    console.log("letters disabled", isDisable);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [isDisable]);
-  useEffect(() => {
-    console.log("enter/delete", isEorD);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [isEorD]);
-  useEffect(() => {
-    console.log("isEnter", isEnter);
-  }, [isEnter]);
-  useEffect(() => {
-    console.log("isDelete", isDelete);
-  }, [isDelete]);
-
-  useEffect(() => {
     if (isDisable === false) {
       if (isEnter === true) {
         if (currentRow > 1) {
@@ -150,7 +118,10 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
       setEnter(true);
     } else if (text === "DELETE") {
       setIsDisable(false);
-      setCurrentLetter("*");
+      setCurrentLetter("");
+      setCurrentColumn(currentColumn-1)
+      let arr=currentWord.slice(0,currentColumn-2);
+      setCurrentWord(arr)
       setEorD(true);
       setDelete(true);
     } else {

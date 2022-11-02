@@ -38,14 +38,17 @@ const Square: FC<SquareProps> = ({ isValid, column, thisRow }) => {
   useEffect(() => {
     if (isValid === "yes") {
       if (column === currentColumn) {
-        if (currentLetter !== "*") {
+        if (isEorD===false) {
           setCurrentWord(currentWord + currentLetter);
           setSquareValue(currentLetter);
         }
+        if(isDelete===true){
+          setSquareValue("")
+          }
       }
     }
     if (currentColumn === 5) {
-      if (currentLetter !== "*") {
+      if (isEorD===false) {
       setIsDisable(true);
       }
       if(squareValue!==""){
@@ -69,7 +72,7 @@ const Square: FC<SquareProps> = ({ isValid, column, thisRow }) => {
       if(squareValue!==""){
         setDisableEnter(true);
       }
-    }    
+    }      
   }, [currentLetter]);
 
   useEffect(()=>{
