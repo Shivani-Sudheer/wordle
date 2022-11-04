@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import {
+  clickEventAtom,
   currentColumnrAtom,
   currentLetterAtom,
   currentRowAtom,
@@ -32,9 +33,11 @@ const Square: FC<SquareProps> = ({ isValid, column, thisRow }) => {
   const [isEnter, setEnter] = useRecoilState(isEnterAtom);
   const [isDelete, setDelete] = useRecoilState(isDeleteAtom);
   const [isDisableEnter, setDisableEnter] = useRecoilState(isDisableEnterAtom);
+  const [isClick, setClick] = useRecoilState(clickEventAtom);
 
   let color=newLetters[thisRow][column-1];
   let borderStyle="*";
+
   useEffect(()=>{
     if (isValid === "yes") {
       if (column === currentColumn) {
@@ -80,7 +83,7 @@ const Square: FC<SquareProps> = ({ isValid, column, thisRow }) => {
         setDisableEnter(true);
       }
     }      
-  }, [currentLetter]);
+  }, [isClick]);
   useEffect(()=>{
     if(isDisable===true){
       setDisableEnter(false);

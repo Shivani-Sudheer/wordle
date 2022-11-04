@@ -3,6 +3,7 @@ import { FC, useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import {
+  clickEventAtom,
   currentColumnrAtom,
   currentLetterAtom,
   currentRowAtom,
@@ -35,6 +36,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
   const [currentColumn, setCurrentColumn] = useRecoilState(currentColumnrAtom);
   const [lost, setLost] = useRecoilState(gameLostAtom);
   const [currentRow, setCurrentRow] = useRecoilState(currentRowAtom);
+  const [isClick, setClick] = useRecoilState(clickEventAtom);
 
   const word = useRecoilValue(fetchWordSelector);
   const actual_letters = word.word.split("");
@@ -47,42 +49,6 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
     ["white", "white", "white", "white", "white"],
     ["white", "white", "white", "white", "white"],
   ];
-
-  useEffect(() => {
-    console.log("current column", currentColumn);
-    console.log("current word", currentWord);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [currentWord]);
-  useEffect(() => {
-    console.log("current column", currentColumn);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [currentColumn]);
-  useEffect(() => {
-    console.log("current row", currentRow);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [currentRow]);
-  useEffect(() => {
-    console.log("current letter", currentLetter);
-  }, [currentLetter]);
-  useEffect(() => {
-    console.log("letters disabled", isDisable);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [isDisable]);
-  useEffect(() => {
-    console.log("enter/delete", isEorD);
-    console.log("isDelete", isDelete);
-    console.log("isEnter", isEnter);
-  }, [isEorD]);
-  useEffect(() => {
-    console.log("isEnter", isEnter);
-  }, [isEnter]);
-  useEffect(() => {
-    console.log("isDelete", isDelete);
-  }, [isDelete]);
 
   useEffect(() => {
     if (isDisable === false) {
@@ -103,7 +69,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
           actual_letters.map((item: any, i: number) => {
             if (item === uItem) {
               if (uIndex === i) {
-                new_letters[currentRow - 1][uIndex] = "#6aaa64";
+                new_letters[currentRow - 1][uIndex] = "#6aaa64"; //green
                 actual_letters[i] = "*";
               } else {
                 if (new_letters[currentRow - 1][uIndex] !== "#6aaa64") {
@@ -114,9 +80,11 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
                       }
                     }
                   } else {
-                    if (new_letters[currentRow - 1][uIndex] !== "#c9b458") {
-                      new_letters[currentRow - 1][uIndex] = "#c9b458";
-                      actual_letters[i] = "*";
+                    if (uItem !== actual_letters[uIndex]) {
+                      if (new_letters[currentRow - 1][uIndex] !== "#c9b458") {
+                        new_letters[currentRow - 1][uIndex] = "#c9b458";
+                        actual_letters[i] = "*";
+                      }
                     }
                   }
                 }
@@ -145,6 +113,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
     }
   }, [isDisable]);
   const handleOnClick = () => {
+    setClick(isClick + 1);
     if (text === "ENTER") {
       setIsDisable(false);
       setCurrentLetter("*");
@@ -158,16 +127,15 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
       if (currentColumn !== 5) {
         if (currentColumn === 1) {
           if (currentWord.length === 0) {
-            
           } else {
             setCurrentColumn(currentColumn - 1);
             let arr = currentWord.slice(0, currentColumn - 2);
             setCurrentWord(arr);
           }
-        }else{
-        setCurrentColumn(currentColumn - 1);
-        let arr = currentWord.slice(0, currentColumn - 2);
-        setCurrentWord(arr);
+        } else {
+          setCurrentColumn(currentColumn - 1);
+          let arr = currentWord.slice(0, currentColumn - 2);
+          setCurrentWord(arr);
         }
       } else {
         if (currentWord.length === 4) {

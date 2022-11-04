@@ -66,3 +66,8 @@ export const newLettersAtom = atom({
     ["white", "white", "white", "white", "white"],
   ],
 });
+
+export const clickEventAtom = atom({
+  key: "clickEvent",
+  default: 0,
+});
