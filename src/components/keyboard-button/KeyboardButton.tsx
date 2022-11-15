@@ -14,9 +14,11 @@ import {
   isDisableAtom,
   isEnterAtom,
   isEnterOrDeleteAtom,
+  keyColorATom,
   newLettersAtom,
 } from "../../states/atoms";
 import { fetchWordSelector } from "../../states/selectors";
+import { keyboard_colors } from "./constants";
 import "./styles.css";
 
 interface KeyboardButtonProps {
@@ -24,7 +26,10 @@ interface KeyboardButtonProps {
   disableEnter?: boolean;
 }
 
-const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
+const KeyboardButton: FC<KeyboardButtonProps> = ({
+  text,
+  disableEnter,
+}) => {
   const [currentLetter, setCurrentLetter] = useRecoilState(currentLetterAtom);
   const [isDisable, setIsDisable] = useRecoilState(isDisableAtom);
   const [isEorD, setEorD] = useRecoilState(isEnterOrDeleteAtom);
@@ -37,6 +42,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
   const [lost, setLost] = useRecoilState(gameLostAtom);
   const [currentRow, setCurrentRow] = useRecoilState(currentRowAtom);
   const [isClick, setClick] = useRecoilState(clickEventAtom);
+  const [keyColor, setKeyColor] = useRecoilState(keyColorATom);
 
   const word = useRecoilValue(fetchWordSelector);
   const actual_letters = word.word.split("");
@@ -49,7 +55,6 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
     ["white", "white", "white", "white", "white"],
     ["white", "white", "white", "white", "white"],
   ];
-
   useEffect(() => {
     if (isDisable === false) {
       if (isEnter === true) {
@@ -71,18 +76,28 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
               if (uIndex === i) {
                 new_letters[currentRow - 1][uIndex] = "#6aaa64"; //green
                 actual_letters[i] = "*";
+                keyboard_colors.set(uItem as unknown as string,"#6aaa64")
               } else {
                 if (new_letters[currentRow - 1][uIndex] !== "#6aaa64") {
                   if (user_letters[i] === item) {
                     if (new_letters[currentRow - 1][uIndex] !== "#6aaa64") {
                       if (new_letters[currentRow - 1][uIndex] !== "#c9b458") {
                         new_letters[currentRow - 1][uIndex] = "grey";
+                        if (actual_letters.includes(uItem)) {
+                        } else {
+                          keyboard_colors.set(uItem as unknown as string,"grey")
+                          setKeyColor(keyboard_colors);
+                        }
                       }
                     }
                   } else {
                     if (uItem !== actual_letters[uIndex]) {
                       if (new_letters[currentRow - 1][uIndex] !== "#c9b458") {
                         new_letters[currentRow - 1][uIndex] = "#c9b458";
+                        if (keyboard_colors.get(uItem)!=="#6aaa64") {
+                          keyboard_colors.set(uItem as unknown as string,"#c9b458")
+                          setKeyColor(keyboard_colors);
+                        }
                         actual_letters[i] = "*";
                       }
                     }
@@ -96,6 +111,10 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
             if (new_letters[currentRow - 1][uIndex] !== "#6aaa64") {
               if (new_letters[currentRow - 1][uIndex] !== "#c9b458") {
                 new_letters[currentRow - 1][uIndex] = "grey";
+                if (keyboard_colors.get(uItem)!=="#6aaa64") {
+                  keyboard_colors.set(uItem as unknown as string,"grey")
+                  setKeyColor(keyboard_colors);
+                }
               }
             }
           }
@@ -174,6 +193,15 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
       }
     }
   }
+ 
+   let keycolor="";
+   if(text==="ENTER"||text==="DELETE")
+   {
+    keycolor="#d3d6da";
+   }
+   else{
+    keycolor=keyColor.get(text) as unknown as string;
+   }
   return (
     <>
       <Button
@@ -181,6 +209,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, disableEnter }) => {
         className="keyboard-button"
         onClick={handleOnClick}
         disabled={disabled}
+        sx={{backgroundColor:keycolor}}
       >
         {text}
       </Button>

@@ -1,4 +1,5 @@
 import { atom } from "recoil";
+import { keyboard_colors } from "../components/keyboard-button/constants";
 
 export const currentLetterAtom = atom({
   key: "currentLetter",
@@ -65,6 +66,11 @@ export const newLettersAtom = atom({
     ["white", "white", "white", "white", "white"],
     ["white", "white", "white", "white", "white"],
   ],
+});
+
+export const keyColorATom = atom({
+  key: "keyColor",
+  default: keyboard_colors,
 });
 
 export const clickEventAtom = atom({
