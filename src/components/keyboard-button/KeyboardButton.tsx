@@ -193,6 +193,9 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
       }
     }
   }
+  if(open===true){
+    disabled=true;
+  }
  
    let keycolor="";
    if(text==="ENTER"||text==="DELETE")
@@ -202,6 +205,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
    else{
     keycolor=keyColor.get(text) as unknown as string;
    }
+
   return (
     <>
       <Button

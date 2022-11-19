@@ -5,7 +5,7 @@ import KeyboardButton from "../keyboard-button/KeyboardButton";
 import "./styles.css";
 
 const Keyboard: FC = () => {
-  const [isDisableEnter, setDisableEnter] = useRecoilState(isDisableEnterAtom);
+  const [isDisableEnter] = useRecoilState(isDisableEnterAtom);
   return (
     <>
     <div className="row1">
