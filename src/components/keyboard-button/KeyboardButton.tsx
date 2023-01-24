@@ -1,210 +1,159 @@
 import { Button } from "@mui/material";
+import _ from "lodash";
 import { FC, useEffect } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilMap } from "react-structured-state";
 
 import {
   clickEventAtom,
-  currentColumnrAtom,
+  currentColumnAtom,
   currentLetterAtom,
   currentRowAtom,
   currentWordAtom,
-  gameLostAtom,
-  gameWonAtom,
+  gameWonOrLostAtom,
   isDeleteAtom,
-  isDisableAtom,
+  isLetterKeysDisabledAtom,
   isEnterAtom,
-  isEnterOrDeleteAtom,
-  keyColorATom,
-  newLettersAtom,
+  keyColorAtom,
+  cellColorsAtom,
 } from "../../states/atoms";
 import { fetchWordSelector } from "../../states/selectors";
-import { keyboard_colors } from "./constants";
 import "./styles.css";
-
+import { CORRECT_LETTER_COLOR, DEFAULT_COLOR, PARTIALLY_CORRECT_COLOR, WRONG_LETTER_COLOR } from "./constants";
 interface KeyboardButtonProps {
   text: string;
-  disableEnter?: boolean;
 }
 
-const KeyboardButton: FC<KeyboardButtonProps> = ({
-  text,
-  disableEnter,
-}) => {
-  const [currentLetter, setCurrentLetter] = useRecoilState(currentLetterAtom);
-  const [isDisable, setIsDisable] = useRecoilState(isDisableAtom);
-  const [isEorD, setEorD] = useRecoilState(isEnterOrDeleteAtom);
+const KeyboardButton: FC<KeyboardButtonProps> = ({ text }) => {
+  const [isLetterKeysDisabled, setIsLetterKeysDisabled] = useRecoilState(
+    isLetterKeysDisabledAtom
+  );
   const [isEnter, setEnter] = useRecoilState(isEnterAtom);
-  const [isDelete, setDelete] = useRecoilState(isDeleteAtom);
   const [currentWord, setCurrentWord] = useRecoilState(currentWordAtom);
-  const [open, setOpen] = useRecoilState(gameWonAtom);
-  const [newLetters, setNewLetters] = useRecoilState(newLettersAtom);
-  const [currentColumn, setCurrentColumn] = useRecoilState(currentColumnrAtom);
-  const [lost, setLost] = useRecoilState(gameLostAtom);
+  const [gameWonOrLost, setGameWonOrLost] = useRecoilState(gameWonOrLostAtom);
+  const [cellColors, setCellColors] = useRecoilState(cellColorsAtom);
+  const [currentColumn, setCurrentColumn] = useRecoilState(currentColumnAtom);
   const [currentRow, setCurrentRow] = useRecoilState(currentRowAtom);
   const [isClick, setClick] = useRecoilState(clickEventAtom);
-  const [keyColor, setKeyColor] = useRecoilState(keyColorATom);
 
   const word = useRecoilValue(fetchWordSelector);
+
+  const setCurrentLetter = useSetRecoilState(currentLetterAtom);
+  const setDelete = useSetRecoilState(isDeleteAtom);
+
+  const [keyColor, setKeyColor] = useRecoilMap(keyColorAtom);
+
   const actual_letters = word.word.split("");
   let user_letters = currentWord.split("");
-  let new_letters = [
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-  ];
+
+  let cell_colors = _.cloneDeep(cellColors);
+
   useEffect(() => {
-    if (isDisable === false) {
-      if (isEnter === true) {
-        if (currentRow > 1) {
-          newLetters.map((item: any, index: number) => {
-            if (index <= currentRow - 2) {
-              new_letters[index] = item;
-            }
-          });
-        }
+    if (!isLetterKeysDisabled) {
+      if (isEnter) {
         if (currentWord === word.word) {
-          setOpen(true);
-          setIsDisable(true);
-        }
-        user_letters.map((uItem: any, uIndex: number) => {
-          let flag = 0;
-          actual_letters.map((item: any, i: number) => {
-            if (item === uItem) {
-              if (uIndex === i) {
-                new_letters[currentRow - 1][uIndex] = "#6aaa64"; //green
-                actual_letters[i] = "*";
-                keyboard_colors.set(uItem as unknown as string,"#6aaa64")
-              } else {
-                if (new_letters[currentRow - 1][uIndex] !== "#6aaa64") {
-                  if (user_letters[i] === item) {
-                    if (new_letters[currentRow - 1][uIndex] !== "#6aaa64") {
-                      if (new_letters[currentRow - 1][uIndex] !== "#c9b458") {
-                        new_letters[currentRow - 1][uIndex] = "grey";
-                        if (actual_letters.includes(uItem)) {
-                        } else {
-                          keyboard_colors.set(uItem as unknown as string,"grey")
-                          setKeyColor(keyboard_colors);
+          setGameWonOrLost(1);
+          setIsLetterKeysDisabled(true);
+          for (let i = 0; i < 5; i++)
+            cell_colors[currentRow - 1][i] = CORRECT_LETTER_COLOR;
+          actual_letters.forEach((letter:string)=>{
+            setKeyColor.set(letter, CORRECT_LETTER_COLOR);
+          })
+          setCellColors(cell_colors);
+        } else {
+          user_letters.forEach((uItem: string, uIndex: number) => {
+            let flag = 0;
+            actual_letters.forEach((aItem: string, aIndex: number) => {
+              if (aItem === uItem) {
+                //if a letter in the user's word also belongs to the actual word
+                if (uIndex === aIndex) {
+                  //if the letter in the user's word is at the right position
+                  cell_colors[currentRow - 1][uIndex] = CORRECT_LETTER_COLOR; //CORRECT_LETTER_COLOR
+                  actual_letters[aIndex] = "*";
+                  setKeyColor.set(uItem, CORRECT_LETTER_COLOR);
+                } else {
+                  if (cell_colors[currentRow - 1][uIndex] !== CORRECT_LETTER_COLOR) {
+                    if (user_letters[aIndex] === aItem) {
+                      //if the right position of the user's word holds the actual letter
+                      if (
+                        cell_colors[currentRow - 1][uIndex] !== CORRECT_LETTER_COLOR &&
+                        cell_colors[currentRow - 1][uIndex] !== PARTIALLY_CORRECT_COLOR
+                      ) {
+                        cell_colors[currentRow - 1][uIndex] = WRONG_LETTER_COLOR;
+                        if (!actual_letters.includes(uItem)) {
+                          setKeyColor.set(uItem, WRONG_LETTER_COLOR);
                         }
                       }
-                    }
-                  } else {
-                    if (uItem !== actual_letters[uIndex]) {
-                      if (new_letters[currentRow - 1][uIndex] !== "#c9b458") {
-                        new_letters[currentRow - 1][uIndex] = "#c9b458";
-                        if (keyboard_colors.get(uItem)!=="#6aaa64") {
-                          keyboard_colors.set(uItem as unknown as string,"#c9b458")
-                          setKeyColor(keyboard_colors);
+                    } else {
+                      if (uItem !== actual_letters[uIndex]) {
+                        if (cell_colors[currentRow - 1][uIndex] !== PARTIALLY_CORRECT_COLOR) {
+                          cell_colors[currentRow - 1][uIndex] = PARTIALLY_CORRECT_COLOR;
+                          if (keyColor.get(uItem) !== CORRECT_LETTER_COLOR) {
+                            setKeyColor.set(uItem, PARTIALLY_CORRECT_COLOR);
+                          }
+                          actual_letters[aIndex] = "*";
                         }
-                        actual_letters[i] = "*";
                       }
                     }
                   }
                 }
+                flag = 1;
               }
-              flag = 1;
-            }
-          });
-          if (flag === 0) {
-            if (new_letters[currentRow - 1][uIndex] !== "#6aaa64") {
-              if (new_letters[currentRow - 1][uIndex] !== "#c9b458") {
-                new_letters[currentRow - 1][uIndex] = "grey";
-                if (keyboard_colors.get(uItem)!=="#6aaa64") {
-                  keyboard_colors.set(uItem as unknown as string,"grey")
-                  setKeyColor(keyboard_colors);
+            });
+
+            if (flag === 0) {
+              //if a letter in the user's word does not belong to the actual word
+              if (
+                cell_colors[currentRow - 1][uIndex] !== CORRECT_LETTER_COLOR &&
+                cell_colors[currentRow - 1][uIndex] !== PARTIALLY_CORRECT_COLOR
+              ) {
+                cell_colors[currentRow - 1][uIndex] = WRONG_LETTER_COLOR;
+                if (
+                  keyColor.get(uItem) !== CORRECT_LETTER_COLOR &&
+                  keyColor.get(uItem) !== PARTIALLY_CORRECT_COLOR
+                ) {
+                  setKeyColor.set(uItem, WRONG_LETTER_COLOR);
                 }
               }
             }
-          }
-        });
-        setCurrentWord("");
-        setNewLetters(new_letters);
+          });
 
-        if (currentRow === 6) {
-          if (currentWord !== word.word) {
-            setLost(true);
+          setCurrentWord("");
+          setCellColors(cell_colors);
+
+          if (currentRow === 6) {
+            if (currentWord !== word.word) {
+              setGameWonOrLost(2);
+            }
           }
         }
       }
       setEnter(false);
-    }
-  }, [isDisable]);
+    } // eslint-disable-next-line
+  }, [isLetterKeysDisabled]);
+
   const handleOnClick = () => {
-    setClick(isClick + 1);
-    if (text === "ENTER") {
-      setIsDisable(false);
-      setCurrentLetter("*");
-      setCurrentColumn(1);
-      setCurrentRow(currentRow + 1);
-      setEorD(true);
-      setEnter(true);
-    } else if (text === "DELETE") {
-      setIsDisable(false);
-      setCurrentLetter("");
-      if (currentColumn !== 5) {
-        if (currentColumn === 1) {
-          if (currentWord.length === 0) {
-          } else {
-            setCurrentColumn(currentColumn - 1);
-            let arr = currentWord.slice(0, currentColumn - 2);
-            setCurrentWord(arr);
-          }
-        } else {
-          setCurrentColumn(currentColumn - 1);
-          let arr = currentWord.slice(0, currentColumn - 2);
-          setCurrentWord(arr);
-        }
+    if (gameWonOrLost === 0) {
+      setClick(isClick + 1);
+      if (text === "ENTER") {
+        setIsLetterKeysDisabled(false);
+        setCurrentLetter("*");
+        setCurrentColumn(0);
+        setCurrentRow(currentRow + 1);
+        setEnter(true);
+      } else if (text === "DELETE") {
+        setIsLetterKeysDisabled(false);
+        setCurrentLetter("");
+        setDelete(true);
+        setCurrentWord(currentWord.slice(0, currentColumn - 1));
       } else {
-        if (currentWord.length === 4) {
-          setCurrentColumn(4);
-          let arr = currentWord.slice(0, currentColumn - 2);
-          setCurrentWord(arr);
-        } else if (currentWord.length === 5) {
-          setCurrentColumn(5);
-          let arr = currentWord.slice(0, currentColumn - 1);
-          setCurrentWord(arr);
-        }
+        setCurrentColumn(currentColumn + 1);
+        setCurrentLetter(text);
+        setEnter(false);
+        setDelete(false);
       }
-      setEorD(true);
-      setDelete(true);
-    } else {
-      setCurrentLetter(text);
-      setEorD(false);
-      setEnter(false);
-      setDelete(false);
     }
   };
-
-  let disabled = false;
-  if (disableEnter === true) {
-    if (text === "ENTER") {
-      disabled = true;
-    }
-  } else {
-    if (isDisable === true) {
-      if (text === "ENTER") {
-        disabled = false;
-      } else if (text === "DELETE") {
-        disabled = false;
-      } else {
-        disabled = true;
-      }
-    }
-  }
-  if(open===true){
-    disabled=true;
-  }
- 
-   let keycolor="";
-   if(text==="ENTER"||text==="DELETE")
-   {
-    keycolor="#d3d6da";
-   }
-   else{
-    keycolor=keyColor.get(text) as unknown as string;
-   }
 
   return (
     <>
@@ -212,8 +161,21 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
         type="button"
         className="keyboard-button"
         onClick={handleOnClick}
-        disabled={disabled}
-        sx={{backgroundColor:keycolor}}
+        disabled={
+          gameWonOrLost !== 0
+            ? true
+            : text === "ENTER"
+            ? !isLetterKeysDisabled
+            : text === "DELETE"
+            ? false
+            : isLetterKeysDisabled
+        }
+        sx={{
+          backgroundColor:
+            text === "ENTER" || text === "DELETE"
+              ? DEFAULT_COLOR
+              : (keyColor.get(text) as unknown as string),
+        }}
       >
         {text}
       </Button>

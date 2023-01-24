@@ -1,5 +1,6 @@
 import { atom } from "recoil";
-import { keyboard_colors } from "../components/keyboard-button/constants";
+
+import { cell_colors, keyboard_colors } from "../components/keyboard-button/constants";
 
 export const currentLetterAtom = atom({
   key: "currentLetter",
@@ -11,13 +12,13 @@ export const currentRowAtom = atom({
   default: 0,
 });
 
-export const currentColumnrAtom = atom({
+export const currentColumnAtom = atom({
   key: "currentColumn",
   default: 0,
 });
 
-export const isDisableAtom = atom({
-  key: "isDisable",
+export const isLetterKeysDisabledAtom = atom({
+  key: "isLetterKeysDisabled",
   default: false,
 });
 
@@ -26,19 +27,9 @@ export const currentWordAtom = atom({
   default: "",
 });
 
-export const gameWonAtom = atom({
-  key: "gameWon",
-  default: false,
-});
-
-export const gameLostAtom = atom({
-  key: "gameLost",
-  default: false,
-});
-
-export const isEnterOrDeleteAtom = atom({
-  key: "enterOrDelete",
-  default: false,
+export const gameWonOrLostAtom = atom({
+  key: "gameWonOrLost",
+  default: 0,
 });
 
 export const isEnterAtom = atom({
@@ -51,24 +42,12 @@ export const isDeleteAtom = atom({
   default: false,
 });
 
-export const isDisableEnterAtom = atom({
-  key: "disableEnter",
-  default: true,
-});
-
-export const newLettersAtom = atom({
+export const cellColorsAtom = atom({
   key: "newLetters",
-  default: [
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-    ["white", "white", "white", "white", "white"],
-  ],
+  default: cell_colors,
 });
 
-export const keyColorATom = atom({
+export const keyColorAtom = atom({
   key: "keyColor",
   default: keyboard_colors,
 });

@@ -1,94 +1,70 @@
-import React, { FC, useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import React, { FC, useEffect } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+
 import {
   clickEventAtom,
-  currentColumnrAtom,
+  currentColumnAtom,
   currentLetterAtom,
-  currentRowAtom,
   currentWordAtom,
   isDeleteAtom,
-  isDisableAtom,
-  isDisableEnterAtom,
+  isLetterKeysDisabledAtom,
   isEnterAtom,
-  isEnterOrDeleteAtom,
-  newLettersAtom,
+  cellColorsAtom,
 } from "../../states/atoms";
 import "./styles.css";
 
 interface SquareProps {
-  isValid?: string;
+  isCurrentRow?: boolean;
   column: number;
   thisRow: number;
 }
 
-const Square: FC<SquareProps> = ({ isValid, column, thisRow }) => {
-  const [currentLetter, setCurrentLetter] = useRecoilState(currentLetterAtom);
-  const [currentRow, setCurrentRow] = useRecoilState(currentRowAtom);
-  const [isDisable, setIsDisable] = useRecoilState(isDisableAtom);
-  const [currentColumn, setCurrentColumn] = useRecoilState(currentColumnrAtom);
-  const [squareValue, setSquareValue] = React.useState("");
-  const [currentWord, setCurrentWord] = useRecoilState(currentWordAtom);
-  const [isEorD,setEorD]=useRecoilState(isEnterOrDeleteAtom);
-  const [newLetters, setNewLetters] = useRecoilState(newLettersAtom);
-  const [isEnter, setEnter] = useRecoilState(isEnterAtom);
-  const [isDelete, setDelete] = useRecoilState(isDeleteAtom);
-  const [isDisableEnter, setDisableEnter] = useRecoilState(isDisableEnterAtom);
-  const [isClick, setClick] = useRecoilState(clickEventAtom);
+const Square: FC<SquareProps> = ({ isCurrentRow, column, thisRow }) => {
 
-  let color=newLetters[thisRow][column-1];
+  const currentLetter = useRecoilValue(currentLetterAtom);
+  const isClick = useRecoilValue(clickEventAtom);
+  const cellColors = useRecoilValue(cellColorsAtom);
+  const isEnter = useRecoilValue(isEnterAtom);
+
+  const [isLetterKeysDisabled, setIsLetterKeysDisabled] = useRecoilState(isLetterKeysDisabledAtom);
+  const [currentColumn, setCurrentColumn] = useRecoilState(currentColumnAtom);  
+  const [currentWord, setCurrentWord] = useRecoilState(currentWordAtom);  
+  const [isDelete, setDelete] = useRecoilState(isDeleteAtom);
+
+  const [squareValue, setSquareValue] = React.useState("");
+
+  let color=cellColors[thisRow][column-1];
   let borderStyle="*";
 
-  useEffect(()=>{
-    if (isValid === "yes") {
-      if (column === currentColumn) {
-        if(isDelete===true){
+  useEffect(()=>{ //delete functionality
+    if (isCurrentRow && column === currentColumn && isDelete===true) {
+      setCurrentColumn(currentColumn - 1);
           setSquareValue("")
           setDelete(false);
-          }
-      }
-    }
+    } // eslint-disable-next-line
   },[isDelete])
+
   useEffect(() => {
-    if (isValid === "yes") {
-      if (column === currentColumn) {
-        if (isEorD===false) {
+    if (isCurrentRow && column === currentColumn && !isEnter && !isDelete) { //setting square value
           setCurrentWord(currentWord + currentLetter);
           setSquareValue(currentLetter);
-        }
-      }
     }
-    if (currentColumn === 5) {
-      if (isEorD===false) {
-      setIsDisable(true);
-      }
-      if(squareValue!==""){
-        if(currentWord.length===5)
-        {
-          setIsDisable(true);
-        }
-      }
-    } 
-    else 
-    { 
-      if(isEorD===false) 
-      {
-        setCurrentColumn(currentColumn + 1);
-      }
-      else{
-        setEorD(false);
-      }
-    }
-    if(currentColumn!==5){
-      if(squareValue!==""){
-        setDisableEnter(true);
-      }
-    }      
+    if(currentColumn!==5 && squareValue!==""){ //disabling enter key
+        setIsLetterKeysDisabled(false);
+    } // eslint-disable-next-line
   }, [isClick]);
+
+  useEffect(()=>{      
+    if(isLetterKeysDisabled){ //enabling enter key
+      setIsLetterKeysDisabled(true);
+    } // eslint-disable-next-line
+  },[isLetterKeysDisabled])
+
   useEffect(()=>{
-    if(isDisable===true){
-      setDisableEnter(false);
-    }
-  },[isDisable])
+    if (currentWord.length===5) { //disabling letter keys
+      setIsLetterKeysDisabled(true);
+    } // eslint-disable-next-line
+  },[currentWord])
 
   return <input className="square" value={squareValue} style={{backgroundColor: color, borderColor: borderStyle}}></input>;
 

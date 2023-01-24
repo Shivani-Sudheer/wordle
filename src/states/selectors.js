@@ -1,5 +1,4 @@
 import { selector } from "recoil";
-import { urlAtom } from "./atoms";
 import axios from "axios";
 
 export const fetchWordSelector = selector({
