@@ -66,7 +66,7 @@ const Square: FC<SquareProps> = ({ isCurrentRow, column, thisRow }) => {
     } // eslint-disable-next-line
   },[currentWord])
 
-  return <input className="square" value={squareValue} style={{backgroundColor: color, borderColor: borderStyle}}></input>;
+  return <input className="square" defaultValue={squareValue} style={{backgroundColor: color, borderColor: borderStyle}}></input>;
 
 };
 export default Square;

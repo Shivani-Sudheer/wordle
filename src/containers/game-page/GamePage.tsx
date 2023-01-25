@@ -1,24 +1,83 @@
 import { Snackbar } from "@mui/material";
 import { FC, useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
+import { keyboard_colors } from "../../components/keyboard-button/constants";
 import Keyboard from "../../components/keyboard/Keyboard";
 import NavBar from "../../components/navbar/navbar";
 import Row from "../../components/row/Row";
-import { gameWonOrLostAtom } from "../../states/atoms";
+import {
+  clickEventAtom,
+  currentColumnAtom,
+  currentLetterAtom,
+  currentRowAtom,
+  currentWordAtom,
+  gameWonOrLostAtom,
+  isDeleteAtom,
+  isEnterAtom,
+  isLetterKeysDisabledAtom,
+} from "../../states/atoms";
 import "./styles.css";
 
 const GamePage: FC = () => {
   const [open, setOpen] = useState<boolean>(false);
 
-  const gameWon = useRecoilValue<number>(gameWonOrLostAtom);
+  const [currentWord, setCurrentWord] = useRecoilState(currentWordAtom);
+  const [currentColumn, setCurrentColumn] = useRecoilState(currentColumnAtom);
+  const [currentRow, setCurrentRow] = useRecoilState(currentRowAtom);
+  const [isClick, setClick] = useRecoilState(clickEventAtom);
+
+  const gameWonOrLost = useRecoilValue(gameWonOrLostAtom);
+
+  const setIsLetterKeysDisabled = useSetRecoilState(
+    isLetterKeysDisabledAtom
+  );
+  const setEnter = useSetRecoilState(isEnterAtom);
+  const setCurrentLetter = useSetRecoilState(currentLetterAtom);
+  const setDelete = useSetRecoilState(isDeleteAtom);
 
   useEffect(() => {
-    if (gameWon===1 || gameWon===2) setOpen(true);
-  }, [gameWon]);
+    if (gameWonOrLost === 1 || gameWonOrLost === 2) setOpen(true);
+  }, [gameWonOrLost]);
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  document.onkeydown = function (event) {
+    if (event.key !== "") {
+      let current_key=event.key.toUpperCase();
+      if (
+        keyboard_colors.has(current_key) ||
+        event.key.toUpperCase() === "DELETE"
+      )
+        handleOnClickOrPress(current_key);
+      else if (current_key === "ENTER" && currentWord.length === 5)
+        handleOnClickOrPress(current_key);
+    }
+  };
+
+  const handleOnClickOrPress = (value: string) => {
+    if (gameWonOrLost === 0) {
+      setClick(isClick + 1);
+      if (value === "ENTER") {
+        setIsLetterKeysDisabled(false);
+        setCurrentLetter("*");
+        setCurrentColumn(0);
+        setCurrentRow(currentRow + 1);
+        setEnter(true);
+      } else if (value === "DELETE") {
+        setIsLetterKeysDisabled(false);
+        setCurrentLetter("");
+        setDelete(true);
+        setCurrentWord(currentWord.slice(0, currentColumn - 1));
+      } else {
+        setCurrentColumn(currentColumn + 1);
+        setCurrentLetter(value);
+        setEnter(false);
+        setDelete(false);
+      }
+    }
   };
 
   return (
@@ -46,12 +105,14 @@ const GamePage: FC = () => {
           </div>
         </div>
         <div className="keyboard">
-          <Keyboard />
+          <Keyboard handleOnClick={handleOnClickOrPress} />
         </div>
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
           open={open}
-          message={gameWon===1 ? "Yayyyy! You Won" : "Better luck next time :("}
+          message={
+            gameWonOrLost === 1 ? "Yayyyy! You Won" : "Better luck next time :("
+          }
           onClose={handleClose}
         />
       </div>

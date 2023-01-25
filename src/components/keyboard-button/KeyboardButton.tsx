@@ -1,17 +1,13 @@
 import { Button } from "@mui/material";
 import _ from "lodash";
 import { FC, useEffect } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { useRecoilMap } from "react-structured-state";
 
 import {
-  clickEventAtom,
-  currentColumnAtom,
-  currentLetterAtom,
   currentRowAtom,
   currentWordAtom,
   gameWonOrLostAtom,
-  isDeleteAtom,
   isLetterKeysDisabledAtom,
   isEnterAtom,
   keyColorAtom,
@@ -19,12 +15,18 @@ import {
 } from "../../states/atoms";
 import { fetchWordSelector } from "../../states/selectors";
 import "./styles.css";
-import { CORRECT_LETTER_COLOR, DEFAULT_COLOR, PARTIALLY_CORRECT_COLOR, WRONG_LETTER_COLOR } from "./constants";
+import {
+  CORRECT_LETTER_COLOR,
+  DEFAULT_COLOR,
+  PARTIALLY_CORRECT_COLOR,
+  WRONG_LETTER_COLOR,
+} from "./constants";
 interface KeyboardButtonProps {
   text: string;
+  handleOnClick: (value: string) => void;
 }
 
-const KeyboardButton: FC<KeyboardButtonProps> = ({ text }) => {
+const KeyboardButton: FC<KeyboardButtonProps> = ({ text, handleOnClick }) => {
   const [isLetterKeysDisabled, setIsLetterKeysDisabled] = useRecoilState(
     isLetterKeysDisabledAtom
   );
@@ -32,14 +34,9 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text }) => {
   const [currentWord, setCurrentWord] = useRecoilState(currentWordAtom);
   const [gameWonOrLost, setGameWonOrLost] = useRecoilState(gameWonOrLostAtom);
   const [cellColors, setCellColors] = useRecoilState(cellColorsAtom);
-  const [currentColumn, setCurrentColumn] = useRecoilState(currentColumnAtom);
-  const [currentRow, setCurrentRow] = useRecoilState(currentRowAtom);
-  const [isClick, setClick] = useRecoilState(clickEventAtom);
 
+  const currentRow = useRecoilValue(currentRowAtom);
   const word = useRecoilValue(fetchWordSelector);
-
-  const setCurrentLetter = useSetRecoilState(currentLetterAtom);
-  const setDelete = useSetRecoilState(isDeleteAtom);
 
   const [keyColor, setKeyColor] = useRecoilMap(keyColorAtom);
 
@@ -56,9 +53,9 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text }) => {
           setIsLetterKeysDisabled(true);
           for (let i = 0; i < 5; i++)
             cell_colors[currentRow - 1][i] = CORRECT_LETTER_COLOR;
-          actual_letters.forEach((letter:string)=>{
+          actual_letters.forEach((letter: string) => {
             setKeyColor.set(letter, CORRECT_LETTER_COLOR);
-          })
+          });
           setCellColors(cell_colors);
         } else {
           user_letters.forEach((uItem: string, uIndex: number) => {
@@ -72,22 +69,31 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text }) => {
                   actual_letters[aIndex] = "*";
                   setKeyColor.set(uItem, CORRECT_LETTER_COLOR);
                 } else {
-                  if (cell_colors[currentRow - 1][uIndex] !== CORRECT_LETTER_COLOR) {
+                  if (
+                    cell_colors[currentRow - 1][uIndex] !== CORRECT_LETTER_COLOR
+                  ) {
                     if (user_letters[aIndex] === aItem) {
                       //if the right position of the user's word holds the actual letter
                       if (
-                        cell_colors[currentRow - 1][uIndex] !== CORRECT_LETTER_COLOR &&
-                        cell_colors[currentRow - 1][uIndex] !== PARTIALLY_CORRECT_COLOR
+                        cell_colors[currentRow - 1][uIndex] !==
+                          CORRECT_LETTER_COLOR &&
+                        cell_colors[currentRow - 1][uIndex] !==
+                          PARTIALLY_CORRECT_COLOR
                       ) {
-                        cell_colors[currentRow - 1][uIndex] = WRONG_LETTER_COLOR;
+                        cell_colors[currentRow - 1][uIndex] =
+                          WRONG_LETTER_COLOR;
                         if (!actual_letters.includes(uItem)) {
                           setKeyColor.set(uItem, WRONG_LETTER_COLOR);
                         }
                       }
                     } else {
                       if (uItem !== actual_letters[uIndex]) {
-                        if (cell_colors[currentRow - 1][uIndex] !== PARTIALLY_CORRECT_COLOR) {
-                          cell_colors[currentRow - 1][uIndex] = PARTIALLY_CORRECT_COLOR;
+                        if (
+                          cell_colors[currentRow - 1][uIndex] !==
+                          PARTIALLY_CORRECT_COLOR
+                        ) {
+                          cell_colors[currentRow - 1][uIndex] =
+                            PARTIALLY_CORRECT_COLOR;
                           if (keyColor.get(uItem) !== CORRECT_LETTER_COLOR) {
                             setKeyColor.set(uItem, PARTIALLY_CORRECT_COLOR);
                           }
@@ -132,35 +138,21 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text }) => {
     } // eslint-disable-next-line
   }, [isLetterKeysDisabled]);
 
-  const handleOnClick = () => {
-    if (gameWonOrLost === 0) {
-      setClick(isClick + 1);
-      if (text === "ENTER") {
-        setIsLetterKeysDisabled(false);
-        setCurrentLetter("*");
-        setCurrentColumn(0);
-        setCurrentRow(currentRow + 1);
-        setEnter(true);
-      } else if (text === "DELETE") {
-        setIsLetterKeysDisabled(false);
-        setCurrentLetter("");
-        setDelete(true);
-        setCurrentWord(currentWord.slice(0, currentColumn - 1));
-      } else {
-        setCurrentColumn(currentColumn + 1);
-        setCurrentLetter(text);
-        setEnter(false);
-        setDelete(false);
+  var input = document.getElementById(`keyboard-letters-${text}`); //to prevent enter key from triggering the letter keys
+  if (input !== null)
+    input.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
       }
-    }
-  };
+    })
 
   return (
     <>
       <Button
         type="button"
         className="keyboard-button"
-        onClick={handleOnClick}
+        id={`keyboard-letters-${text}`}
+        onClick={() => handleOnClick(text)}
         disabled={
           gameWonOrLost !== 0
             ? true
