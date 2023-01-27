@@ -21,40 +21,45 @@ import "./styles.css";
 
 const GamePage: FC = () => {
   const [open, setOpen] = useState<boolean>(false);
+  const [isWordValid, setWordValid] = useState<boolean>(false);
 
   const [currentWord, setCurrentWord] = useRecoilState(currentWordAtom);
   const [currentColumn, setCurrentColumn] = useRecoilState(currentColumnAtom);
   const [currentRow, setCurrentRow] = useRecoilState(currentRowAtom);
   const [isClick, setClick] = useRecoilState(clickEventAtom);
+  const [gameWonOrLost, setGameWonOrLost] = useRecoilState(gameWonOrLostAtom);
 
-  const gameWonOrLost = useRecoilValue(gameWonOrLostAtom);
-
-  const setIsLetterKeysDisabled = useSetRecoilState(
-    isLetterKeysDisabledAtom
-  );
+  const setIsLetterKeysDisabled = useSetRecoilState(isLetterKeysDisabledAtom);
   const setEnter = useSetRecoilState(isEnterAtom);
   const setCurrentLetter = useSetRecoilState(currentLetterAtom);
   const setDelete = useSetRecoilState(isDeleteAtom);
 
+  document.onkeydown = function (event) {
+    const current_key=event.key;
+    if (current_key !== "") {
+      if (keyboard_colors.has(current_key.toUpperCase()) || current_key === "Delete")
+        handleOnClickOrPress(current_key.toUpperCase());
+      else if (current_key === "Enter" && currentWord.length === 5)
+        isWordValid ? handleOnClickOrPress(current_key.toUpperCase()) : handleOnInvalidWord();
+    }
+  };
+
   useEffect(() => {
-    if (gameWonOrLost === 1 || gameWonOrLost === 2) setOpen(true);
+    if (gameWonOrLost !== 0) setOpen(true);
   }, [gameWonOrLost]);
 
   const handleClose = () => {
     setOpen(false);
+    if (gameWonOrLost === 3) setGameWonOrLost(0);
   };
 
-  document.onkeydown = function (event) {
-    if (event.key !== "") {
-      let current_key=event.key.toUpperCase();
-      if (
-        keyboard_colors.has(current_key) ||
-        event.key.toUpperCase() === "DELETE"
-      )
-        handleOnClickOrPress(current_key);
-      else if (current_key === "ENTER" && currentWord.length === 5)
-        handleOnClickOrPress(current_key);
-    }
+  const handleOnInvalidWord = () => {
+    setOpen(true);
+    setGameWonOrLost(3);
+  };
+
+  const checkIsWordValid = (isValid: boolean) => {
+    setWordValid(isValid);
   };
 
   const handleOnClickOrPress = (value: string) => {
@@ -105,15 +110,24 @@ const GamePage: FC = () => {
           </div>
         </div>
         <div className="keyboard">
-          <Keyboard handleOnClick={handleOnClickOrPress} />
+          <Keyboard
+            handleOnClick={handleOnClickOrPress}
+            handleOnInvalidWord={handleOnInvalidWord}
+            checkIsWordValid={checkIsWordValid}
+          />
         </div>
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
           open={open}
           message={
-            gameWonOrLost === 1 ? "Yayyyy! You Won" : "Better luck next time :("
+            gameWonOrLost === 1
+              ? "Yayyyy! You Won :D"
+              : gameWonOrLost === 2
+              ? "Better luck next time :("
+              : "Oops! Seems like that isn't a real word :("
           }
           onClose={handleClose}
+          autoHideDuration={2000}
         />
       </div>
     </>

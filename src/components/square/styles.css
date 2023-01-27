@@ -1,7 +1,8 @@
 .square {
     height: 58px;
-    width: 40px;
+    width: 58px;
     margin: 2.5px;
+    text-align: center;
     border-color: #d3d6da;
     border-style: solid;
     border-width: 2px;
@@ -15,7 +16,6 @@
   }
 
   input{
-    font-size: 30px;
+    font-size: 2rem;
     font-weight: bold;
-    padding-left: 19px;
   }

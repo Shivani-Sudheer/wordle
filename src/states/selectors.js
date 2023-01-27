@@ -1,4 +1,4 @@
-import { selector } from "recoil";
+import { selector, selectorFamily } from "recoil";
 import axios from "axios";
 
 export const fetchWordSelector = selector({
@@ -12,3 +12,18 @@ export const fetchWordSelector = selector({
     }
   },
 });
+
+export const checkValidSelector = selectorFamily({
+  key: "checkValidSelector",
+  get: word=>async ({ get }) => {
+    try {
+      const response = await axios.post(`http://localhost:4000/validWords/isValid`, {
+          word: word
+      })
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+});
+

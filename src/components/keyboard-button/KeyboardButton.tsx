@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import _ from "lodash";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useRecoilMap } from "react-structured-state";
 
@@ -13,7 +13,7 @@ import {
   keyColorAtom,
   cellColorsAtom,
 } from "../../states/atoms";
-import { fetchWordSelector } from "../../states/selectors";
+import { fetchWordSelector, checkValidSelector } from "../../states/selectors";
 import "./styles.css";
 import {
   CORRECT_LETTER_COLOR,
@@ -21,12 +21,22 @@ import {
   PARTIALLY_CORRECT_COLOR,
   WRONG_LETTER_COLOR,
 } from "./constants";
+import axios from "axios";
 interface KeyboardButtonProps {
   text: string;
   handleOnClick: (value: string) => void;
+  handleOnInvalidWord: () => void;
+  checkIsWordValid: (isValid: boolean) => void;
 }
 
-const KeyboardButton: FC<KeyboardButtonProps> = ({ text, handleOnClick }) => {
+const KeyboardButton: FC<KeyboardButtonProps> = ({
+  text,
+  handleOnClick,
+  handleOnInvalidWord,
+  checkIsWordValid,
+}) => {
+  const [isWordValid, setWordValid] = useState<boolean>(false);
+
   const [isLetterKeysDisabled, setIsLetterKeysDisabled] = useRecoilState(
     isLetterKeysDisabledAtom
   );
@@ -46,6 +56,19 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, handleOnClick }) => {
   let cell_colors = _.cloneDeep(cellColors);
 
   useEffect(() => {
+    if (currentWord.length === 5) {
+      axios
+        .post(`http://localhost:4000/validWords/isValid`, {
+          word: currentWord.toLowerCase(),
+        })
+        .then((response) => {
+          setWordValid(response.data);
+          checkIsWordValid(response.data)
+        });
+    }
+  }, [currentWord]);
+
+  useEffect(() => {
     if (!isLetterKeysDisabled) {
       if (isEnter) {
         if (currentWord === word.word) {
@@ -58,75 +81,79 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, handleOnClick }) => {
           });
           setCellColors(cell_colors);
         } else {
-          user_letters.forEach((uItem: string, uIndex: number) => {
-            let flag = 0;
-            actual_letters.forEach((aItem: string, aIndex: number) => {
-              if (aItem === uItem) {
-                //if a letter in the user's word also belongs to the actual word
-                if (uIndex === aIndex) {
-                  //if the letter in the user's word is at the right position
-                  cell_colors[currentRow - 1][uIndex] = CORRECT_LETTER_COLOR; //CORRECT_LETTER_COLOR
-                  actual_letters[aIndex] = "*";
-                  setKeyColor.set(uItem, CORRECT_LETTER_COLOR);
-                } else {
-                  if (
-                    cell_colors[currentRow - 1][uIndex] !== CORRECT_LETTER_COLOR
-                  ) {
-                    if (user_letters[aIndex] === aItem) {
-                      //if the right position of the user's word holds the actual letter
-                      if (
-                        cell_colors[currentRow - 1][uIndex] !==
-                          CORRECT_LETTER_COLOR &&
-                        cell_colors[currentRow - 1][uIndex] !==
-                          PARTIALLY_CORRECT_COLOR
-                      ) {
-                        cell_colors[currentRow - 1][uIndex] =
-                          WRONG_LETTER_COLOR;
-                        if (!actual_letters.includes(uItem)) {
-                          setKeyColor.set(uItem, WRONG_LETTER_COLOR);
-                        }
-                      }
-                    } else {
-                      if (uItem !== actual_letters[uIndex]) {
+          if (isWordValid) {
+            user_letters.forEach((uItem: string, uIndex: number) => {
+              let flag = 0;
+              actual_letters.forEach((aItem: string, aIndex: number) => {
+                if (aItem === uItem) {
+                  //if a letter in the user's word also belongs to the actual word
+                  if (uIndex === aIndex) {
+                    //if the letter in the user's word is at the right position
+                    cell_colors[currentRow - 1][uIndex] = CORRECT_LETTER_COLOR; //CORRECT_LETTER_COLOR
+                    actual_letters[aIndex] = "*";
+                    setKeyColor.set(uItem, CORRECT_LETTER_COLOR);
+                  } else {
+                    if (
+                      cell_colors[currentRow - 1][uIndex] !==
+                      CORRECT_LETTER_COLOR
+                    ) {
+                      if (user_letters[aIndex] === aItem) {
+                        //if the right position of the user's word holds the actual letter
                         if (
                           cell_colors[currentRow - 1][uIndex] !==
-                          PARTIALLY_CORRECT_COLOR
+                            CORRECT_LETTER_COLOR &&
+                          cell_colors[currentRow - 1][uIndex] !==
+                            PARTIALLY_CORRECT_COLOR
                         ) {
                           cell_colors[currentRow - 1][uIndex] =
-                            PARTIALLY_CORRECT_COLOR;
-                          if (keyColor.get(uItem) !== CORRECT_LETTER_COLOR) {
-                            setKeyColor.set(uItem, PARTIALLY_CORRECT_COLOR);
+                            WRONG_LETTER_COLOR;
+                          if (!actual_letters.includes(uItem)) {
+                            setKeyColor.set(uItem, WRONG_LETTER_COLOR);
                           }
-                          actual_letters[aIndex] = "*";
+                        }
+                      } else {
+                        if (uItem !== actual_letters[uIndex]) {
+                          if (
+                            cell_colors[currentRow - 1][uIndex] !==
+                            PARTIALLY_CORRECT_COLOR
+                          ) {
+                            cell_colors[currentRow - 1][uIndex] =
+                              PARTIALLY_CORRECT_COLOR;
+                            if (keyColor.get(uItem) !== CORRECT_LETTER_COLOR) {
+                              setKeyColor.set(uItem, PARTIALLY_CORRECT_COLOR);
+                            }
+                            actual_letters[aIndex] = "*";
+                          }
                         }
                       }
                     }
                   }
+                  flag = 1;
                 }
-                flag = 1;
+              });
+
+              if (flag === 0) {
+                //if a letter in the user's word does not belong to the actual word
+                if (
+                  cell_colors[currentRow - 1][uIndex] !==
+                    CORRECT_LETTER_COLOR &&
+                  cell_colors[currentRow - 1][uIndex] !==
+                    PARTIALLY_CORRECT_COLOR
+                ) {
+                  cell_colors[currentRow - 1][uIndex] = WRONG_LETTER_COLOR;
+                  if (
+                    keyColor.get(uItem) !== CORRECT_LETTER_COLOR &&
+                    keyColor.get(uItem) !== PARTIALLY_CORRECT_COLOR
+                  ) {
+                    setKeyColor.set(uItem, WRONG_LETTER_COLOR);
+                  }
+                }
               }
             });
 
-            if (flag === 0) {
-              //if a letter in the user's word does not belong to the actual word
-              if (
-                cell_colors[currentRow - 1][uIndex] !== CORRECT_LETTER_COLOR &&
-                cell_colors[currentRow - 1][uIndex] !== PARTIALLY_CORRECT_COLOR
-              ) {
-                cell_colors[currentRow - 1][uIndex] = WRONG_LETTER_COLOR;
-                if (
-                  keyColor.get(uItem) !== CORRECT_LETTER_COLOR &&
-                  keyColor.get(uItem) !== PARTIALLY_CORRECT_COLOR
-                ) {
-                  setKeyColor.set(uItem, WRONG_LETTER_COLOR);
-                }
-              }
-            }
-          });
-
-          setCurrentWord("");
-          setCellColors(cell_colors);
-
+            setCurrentWord("");
+            setCellColors(cell_colors);
+          }
           if (currentRow === 6) {
             if (currentWord !== word.word) {
               setGameWonOrLost(2);
@@ -144,7 +171,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, handleOnClick }) => {
       if (event.key === "Enter") {
         event.preventDefault();
       }
-    })
+    });
 
   return (
     <>
@@ -152,7 +179,11 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({ text, handleOnClick }) => {
         type="button"
         className="keyboard-button"
         id={`keyboard-letters-${text}`}
-        onClick={() => handleOnClick(text)}
+        onClick={() => {
+          !isWordValid && text === "ENTER"
+            ? handleOnInvalidWord()
+            : handleOnClick(text);
+        }}
         disabled={
           gameWonOrLost !== 0
             ? true
