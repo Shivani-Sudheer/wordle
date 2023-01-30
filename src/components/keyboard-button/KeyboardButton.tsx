@@ -2,7 +2,6 @@ import { Button } from "@mui/material";
 import _ from "lodash";
 import { FC, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { useRecoilMap } from "react-structured-state";
 
 import {
   currentRowAtom,
@@ -13,7 +12,7 @@ import {
   keyColorAtom,
   cellColorsAtom,
 } from "../../states/atoms";
-import { fetchWordSelector, checkValidSelector } from "../../states/selectors";
+import { fetchWordSelector } from "../../states/selectors";
 import "./styles.css";
 import {
   CORRECT_LETTER_COLOR,
@@ -48,7 +47,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
   const currentRow = useRecoilValue(currentRowAtom);
   const word = useRecoilValue(fetchWordSelector);
 
-  const [keyColor, setKeyColor] = useRecoilMap(keyColorAtom);
+  const keyColor = useRecoilValue(keyColorAtom);
 
   const actual_letters = word.word.split("");
   let user_letters = currentWord.split("");
@@ -63,7 +62,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
         })
         .then((response) => {
           setWordValid(response.data);
-          checkIsWordValid(response.data)
+          checkIsWordValid(response.data);
         });
     }
   }, [currentWord]);
@@ -77,7 +76,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
           for (let i = 0; i < 5; i++)
             cell_colors[currentRow - 1][i] = CORRECT_LETTER_COLOR;
           actual_letters.forEach((letter: string) => {
-            setKeyColor.set(letter, CORRECT_LETTER_COLOR);
+            keyColor.set(letter, CORRECT_LETTER_COLOR);
           });
           setCellColors(cell_colors);
         } else {
@@ -89,9 +88,9 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
                   //if a letter in the user's word also belongs to the actual word
                   if (uIndex === aIndex) {
                     //if the letter in the user's word is at the right position
-                    cell_colors[currentRow - 1][uIndex] = CORRECT_LETTER_COLOR; //CORRECT_LETTER_COLOR
+                    cell_colors[currentRow - 1][uIndex] = CORRECT_LETTER_COLOR;
                     actual_letters[aIndex] = "*";
-                    setKeyColor.set(uItem, CORRECT_LETTER_COLOR);
+                    keyColor.set(uItem, CORRECT_LETTER_COLOR);
                   } else {
                     if (
                       cell_colors[currentRow - 1][uIndex] !==
@@ -107,8 +106,13 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
                         ) {
                           cell_colors[currentRow - 1][uIndex] =
                             WRONG_LETTER_COLOR;
-                          if (!actual_letters.includes(uItem)) {
-                            setKeyColor.set(uItem, WRONG_LETTER_COLOR);
+                        }
+                        if (!actual_letters.includes(uItem)) {
+                          if (
+                            keyColor.get(uItem) !== CORRECT_LETTER_COLOR &&
+                            keyColor.get(uItem) !== PARTIALLY_CORRECT_COLOR
+                          ) {
+                            keyColor.set(uItem, WRONG_LETTER_COLOR);
                           }
                         }
                       } else {
@@ -119,10 +123,10 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
                           ) {
                             cell_colors[currentRow - 1][uIndex] =
                               PARTIALLY_CORRECT_COLOR;
-                            if (keyColor.get(uItem) !== CORRECT_LETTER_COLOR) {
-                              setKeyColor.set(uItem, PARTIALLY_CORRECT_COLOR);
-                            }
                             actual_letters[aIndex] = "*";
+                          }
+                          if (keyColor.get(uItem) !== CORRECT_LETTER_COLOR) {
+                            keyColor.set(uItem, PARTIALLY_CORRECT_COLOR);
                           }
                         }
                       }
@@ -141,16 +145,15 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
                     PARTIALLY_CORRECT_COLOR
                 ) {
                   cell_colors[currentRow - 1][uIndex] = WRONG_LETTER_COLOR;
-                  if (
-                    keyColor.get(uItem) !== CORRECT_LETTER_COLOR &&
-                    keyColor.get(uItem) !== PARTIALLY_CORRECT_COLOR
-                  ) {
-                    setKeyColor.set(uItem, WRONG_LETTER_COLOR);
-                  }
+                }
+                if (
+                  keyColor.get(uItem) !== CORRECT_LETTER_COLOR &&
+                  keyColor.get(uItem) !== PARTIALLY_CORRECT_COLOR
+                ) {
+                  keyColor.set(uItem, WRONG_LETTER_COLOR);
                 }
               }
             });
-
             setCurrentWord("");
             setCellColors(cell_colors);
           }

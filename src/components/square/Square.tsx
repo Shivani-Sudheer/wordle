@@ -44,7 +44,7 @@ const Square: FC<SquareProps> = ({ isCurrentRow, column, thisRow }) => {
       setDelete(false);
     } // eslint-disable-next-line
   }, [isDelete]);
-  
+
   useEffect(() => {
     if (isCurrentRow && column === currentColumn && !isEnter && !isDelete) {
       //setting square value
@@ -77,7 +77,19 @@ const Square: FC<SquareProps> = ({ isCurrentRow, column, thisRow }) => {
       defaultValue={squareValue}
       style={{
         backgroundColor: color,
-        borderColor: squareValue && "2px solid var(--color-tone-3)",
+        borderColor:
+          squareValue && color === "white"
+            ? "2px solid var(--color-tone-3)"
+            : "#d3d6da",
+        color: squareValue && color === "white" ? "black" : "white",
+        animation: color !== "white" ? "flip 0.5s ease forwards" : "none",
+        animationDelay: color !== "white" ? `${0.2 * column}s` : "none",
+        transition:
+          color !== "white"
+            ? `background-color ${0 * column}s linear,color ${
+                0 * column
+              }s linear, border-color ${0 * column}s linear`
+            : "none",
       }}
     ></input>
   );

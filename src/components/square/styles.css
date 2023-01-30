@@ -1,21 +1,56 @@
 .square {
-    height: 58px;
-    width: 58px;
-    margin: 2.5px;
-    text-align: center;
-    border-color: #d3d6da;
-    border-style: solid;
-    border-width: 2px;
-    caret-color: transparent;
-    cursor: default;
+  height: 58px;
+  width: 58px;
+  margin: 2.5px;
+  text-align: center;
+  border-style: solid;
+  border-width: 2px;
+  caret-color: transparent;
+  cursor: default;
+}
+
+input:focus {
+  outline: none;
+  cursor: default;
+}
+
+.square:nth-child(1) {
+  transition-delay: 0.4s !important;
+}
+
+.square:nth-child(2) {
+  transition-delay: 0.6s !important;
+}
+
+.square:nth-child(3) {
+  transition-delay: 0.8s !important;
+}
+
+.square:nth-child(4) {
+  transition-delay: 1s !important;
+}
+
+.square:nth-child(5) {
+  transition-delay: 1.2s !important;
+}
+
+input {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateX(0deg);
+  }
+  45% {
+    transform: rotateX(90deg);
   }
 
-  input:focus{
-    outline: none;
-    cursor: default;
+  55% {
+    transform: rotateX(90deg);
   }
-
-  input{
-    font-size: 2rem;
-    font-weight: bold;
+  100% {
+    transform: rotateX(0);
   }
+}
