@@ -41,7 +41,7 @@ const NavBar: FC = () => {
             variant="h6"
             component="div"
             sx={{
-              fontFamily: "Georgia",
+              fontFamily: "Georgia !important",
               fontWeight: "bolder",
               fontSize: "36px",
             }}

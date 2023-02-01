@@ -1,6 +1,7 @@
 import { Snackbar } from "@mui/material";
 import { FC, useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import Confetti from "react-confetti";
 
 import { keyboard_colors } from "../../components/keyboard-button/constants";
 import Keyboard from "../../components/keyboard/Keyboard";
@@ -18,9 +19,11 @@ import {
   isLetterKeysDisabledAtom,
 } from "../../states/atoms";
 import "./styles.css";
+import FinalModal from "../../components/modal/FinalModal";
 
 const GamePage: FC = () => {
   const [open, setOpen] = useState<boolean>(false);
+  const [confetti, setConfetti] = useState<boolean>(false);
   const [isWordValid, setWordValid] = useState<boolean>(false);
 
   const [currentWord, setCurrentWord] = useRecoilState(currentWordAtom);
@@ -36,6 +39,7 @@ const GamePage: FC = () => {
 
   document.onkeydown = function (event) {
     const current_key=event.key;
+    if(current_key==="Control") event.stopPropagation();
     if (current_key !== "") {
       if (keyboard_colors.has(current_key.toUpperCase()) || current_key === "Delete")
         handleOnClickOrPress(current_key.toUpperCase());
@@ -45,7 +49,17 @@ const GamePage: FC = () => {
   };
 
   useEffect(() => {
-    if (gameWonOrLost !== 0) setOpen(true);
+    if (gameWonOrLost!==0) {
+      const confettiTmer = setTimeout(() => {
+        if(gameWonOrLost===1)setConfetti(true)
+        else if(gameWonOrLost===2)setOpen(true)
+      }, 1600);
+      const modalTimer = setTimeout(() => {
+        if(gameWonOrLost==1) setOpen(true)
+      }, 6000);
+      return () => {clearTimeout(confettiTmer)
+      clearTimeout(modalTimer)}
+    }
   }, [gameWonOrLost]);
 
   const handleClose = () => {
@@ -54,7 +68,6 @@ const GamePage: FC = () => {
   };
 
   const handleOnInvalidWord = () => {
-    setOpen(true);
     setGameWonOrLost(3);
   };
 
@@ -77,10 +90,11 @@ const GamePage: FC = () => {
         setDelete(true);
         setCurrentWord(currentWord.slice(0, currentColumn - 1));
       } else {
-        setCurrentColumn(currentColumn + 1);
+        if(currentColumn!==5)
+        {setCurrentColumn(currentColumn + 1);
         setCurrentLetter(value);
         setEnter(false);
-        setDelete(false);
+        setDelete(false);}
       }
     }
   };
@@ -118,17 +132,13 @@ const GamePage: FC = () => {
         </div>
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          open={open}
-          message={
-            gameWonOrLost === 1
-              ? "Yayyyy! You Won :D"
-              : gameWonOrLost === 2
-              ? "Better luck next time :("
-              : "Oops! Seems like that isn't a real word :("
-          }
+          open={Boolean(gameWonOrLost===3)}
+          message="Oops! Seems like that isn't a real word :("
           onClose={handleClose}
           autoHideDuration={2000}
         />
+        <FinalModal open={open} />
+        {confetti&&<Confetti />}
       </div>
     </>
   );

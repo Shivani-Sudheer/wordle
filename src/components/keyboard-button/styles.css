@@ -11,7 +11,7 @@
   border: none !important;
   cursor: pointer !important;
   transition: background-color 0s linear;
-  transition-delay: 1.8s !important;
+  transition-delay: 1.6s !important;
 }
 
 .keyboard-button:hover {

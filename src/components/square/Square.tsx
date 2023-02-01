@@ -10,6 +10,7 @@ import {
   isLetterKeysDisabledAtom,
   isEnterAtom,
   cellColorsAtom,
+  gameWonOrLostAtom,
 } from "../../states/atoms";
 import "./styles.css";
 
@@ -24,6 +25,7 @@ const Square: FC<SquareProps> = ({ isCurrentRow, column, thisRow }) => {
   const isClick = useRecoilValue(clickEventAtom);
   const cellColors = useRecoilValue(cellColorsAtom);
   const isEnter = useRecoilValue(isEnterAtom);
+  const gameWonOrLost = useRecoilValue(gameWonOrLostAtom);
 
   const [isLetterKeysDisabled, setIsLetterKeysDisabled] = useRecoilState(
     isLetterKeysDisabledAtom
@@ -82,7 +84,7 @@ const Square: FC<SquareProps> = ({ isCurrentRow, column, thisRow }) => {
             ? "2px solid var(--color-tone-3)"
             : "#d3d6da",
         color: squareValue && color === "white" ? "black" : "white",
-        animation: color !== "white" ? "flip 0.5s ease forwards" : "none",
+        animation: color !== "white" ? "flip 0.5s ease forwards" : gameWonOrLost===3 && squareValue ? "shake 0.5s" : "none",
         animationDelay: color !== "white" ? `${0.2 * column}s` : "none",
         transition:
           color !== "white"
