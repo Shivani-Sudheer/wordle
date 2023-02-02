@@ -20,9 +20,7 @@ const style = {
   border: "none",
 };
 
-const FinalModal: FC<FinalModalProps> = ({
-  open,
-}) => {
+const FinalModal: FC<FinalModalProps> = ({ open }) => {
   const gameWonOrLost = useRecoilValue(gameWonOrLostAtom);
 
   const [seconds, setSeconds] = useState(60 - new Date().getSeconds());
@@ -64,9 +62,17 @@ const FinalModal: FC<FinalModalProps> = ({
           />
           {gameWonOrLost === 1 ? (
             <img src="trophy.png" alt="Trophy" id="trophy" />
-          ):<img src="sad.png" alt="Sad face" id="sad-face" />}
-          <Typography id="modal-title">{gameWonOrLost===1 ? "Congratulations!" : "Sorry!"}</Typography>
-          <Typography sx={{ mt: 1.5 }}>{gameWonOrLost===1? "You are good at this.": "You have run out of guesses."}</Typography>
+          ) : (
+            <img src="sad.png" alt="Sad face" id="sad-face" />
+          )}
+          <Typography id="modal-title">
+            {gameWonOrLost === 1 ? "Congratulations!" : "Sorry!"}
+          </Typography>
+          <Typography sx={{ mt: 1.5 }}>
+            {gameWonOrLost === 1
+              ? "You are good at this."
+              : "You have run out of guesses."}
+          </Typography>
           <Typography>
             🌟 Your next !wordle starts in {hours}:{minutes}:{seconds} 🌟
           </Typography>

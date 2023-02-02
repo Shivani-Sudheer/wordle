@@ -84,7 +84,7 @@ const Square: FC<SquareProps> = ({ isCurrentRow, column, thisRow }) => {
             ? "2px solid var(--color-tone-3)"
             : "#d3d6da",
         color: squareValue && color === "white" ? "black" : "white",
-        animation: color !== "white" ? "flip 0.5s ease forwards" : gameWonOrLost===3 && squareValue ? "shake 0.5s" : "none",
+        animation: color !== "white" ? "flip 0.5s ease forwards" : gameWonOrLost===3 && squareValue ? "shake 0.5s" : squareValue?"fill 0.1s": "none",
         animationDelay: color !== "white" ? `${0.2 * column}s` : "none",
         transition:
           color !== "white"

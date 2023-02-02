@@ -72,3 +72,16 @@ input {
     transform: translate3d(4px, 0, 0);
   }
 }
+
+@keyframes fill {
+  0%{
+    font-size: 32px;
+  }
+  50%{
+    font-size: 36px;
+  }
+
+  100%{
+    font-size: 32px;
+  }
+}

@@ -38,27 +38,34 @@ const GamePage: FC = () => {
   const setDelete = useSetRecoilState(isDeleteAtom);
 
   document.onkeydown = function (event) {
-    const current_key=event.key;
-    if(current_key==="Control") event.stopPropagation();
+    const current_key = event.key;
+    if (current_key === "Control") event.stopPropagation();
     if (current_key !== "") {
-      if (keyboard_colors.has(current_key.toUpperCase()) || current_key === "Delete")
+      if (
+        keyboard_colors.has(current_key.toUpperCase()) ||
+        current_key === "Delete"
+      )
         handleOnClickOrPress(current_key.toUpperCase());
       else if (current_key === "Enter" && currentWord.length === 5)
-        isWordValid ? handleOnClickOrPress(current_key.toUpperCase()) : handleOnInvalidWord();
+        isWordValid
+          ? handleOnClickOrPress(current_key.toUpperCase())
+          : handleOnInvalidWord();
     }
   };
 
   useEffect(() => {
-    if (gameWonOrLost!==0) {
+    if (gameWonOrLost !== 0) {
       const confettiTmer = setTimeout(() => {
-        if(gameWonOrLost===1)setConfetti(true)
-        else if(gameWonOrLost===2)setOpen(true)
+        if (gameWonOrLost === 1) setConfetti(true);
+        else if (gameWonOrLost === 2) setOpen(true);
       }, 1600);
       const modalTimer = setTimeout(() => {
-        if(gameWonOrLost==1) setOpen(true)
+        if (gameWonOrLost == 1) setOpen(true);
       }, 6000);
-      return () => {clearTimeout(confettiTmer)
-      clearTimeout(modalTimer)}
+      return () => {
+        clearTimeout(confettiTmer);
+        clearTimeout(modalTimer);
+      };
     }
   }, [gameWonOrLost]);
 
@@ -90,11 +97,12 @@ const GamePage: FC = () => {
         setDelete(true);
         setCurrentWord(currentWord.slice(0, currentColumn - 1));
       } else {
-        if(currentColumn!==5)
-        {setCurrentColumn(currentColumn + 1);
-        setCurrentLetter(value);
-        setEnter(false);
-        setDelete(false);}
+        if (currentColumn !== 5) {
+          setCurrentColumn(currentColumn + 1);
+          setCurrentLetter(value);
+          setEnter(false);
+          setDelete(false);
+        }
       }
     }
   };
@@ -132,13 +140,13 @@ const GamePage: FC = () => {
         </div>
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          open={Boolean(gameWonOrLost===3)}
+          open={Boolean(gameWonOrLost === 3)}
           message="Oops! Seems like that isn't a real word :("
           onClose={handleClose}
           autoHideDuration={2000}
         />
         <FinalModal open={open} />
-        {confetti&&<Confetti />}
+        {confetti && <Confetti />}
       </div>
     </>
   );
