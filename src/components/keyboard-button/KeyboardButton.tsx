@@ -64,7 +64,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
           setWordValid(response.data);
           checkIsWordValid(response.data);
         });
-    }
+    } // eslint-disable-next-line
   }, [currentWord]);
 
   useEffect(() => {
