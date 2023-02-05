@@ -60,7 +60,7 @@ const GamePage: FC = () => {
         else if (gameWonOrLost === 2) setOpen(true);
       }, 1600);
       const modalTimer = setTimeout(() => {
-        if (gameWonOrLost == 1) setOpen(true);
+        if (gameWonOrLost === 1) setOpen(true);
       }, 6000);
       return () => {
         clearTimeout(confettiTmer);
