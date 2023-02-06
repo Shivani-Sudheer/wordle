@@ -57,7 +57,7 @@ const KeyboardButton: FC<KeyboardButtonProps> = ({
   useEffect(() => {
     if (currentWord.length === 5) {
       axios
-        .post(`https://wordlenot-production.up.railway.app/validWords/isValid`, {
+        .post(`https://wordlenot-production-12c7.up.railway.app/validWords/isValid`, {
           word: currentWord.toLowerCase(),
         })
         .then((response) => {
